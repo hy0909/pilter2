@@ -214,6 +214,33 @@ button{font:inherit;border:0;background:none;cursor:pointer;color:inherit}
 .feed video.live{opacity:1}
 .camhead,.cambottom{position:relative;z-index:5;background:rgba(0,0,0,.5)}
 .cambottom{height:44px;flex:none}
+/* 실시간 환자 띠: 촬영 화면 아래를 할애해서, 지금까지 지나간 환자별로 오류 봉지 번호를 바로 보여 줌 */
+#camera .cambottom{height:72px;display:flex;align-items:stretch;gap:6px;padding:12px 16px 14px;overflow-x:auto;scrollbar-width:none}
+#camera .cambottom::-webkit-scrollbar{display:none}
+.pcell{flex:0 0 132px;position:relative;border-radius:8px;border:1.5px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);padding:5px 10px;display:flex;flex-direction:column;justify-content:center;gap:1px;text-align:left;color:#fff;cursor:default;animation:pin .3s ease}
+@keyframes pin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.pcell .nm{font:600 13px/18px Pretendard;color:var(--g100);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pcell .nm small{font:400 12px/18px Pretendard;color:var(--g300);margin-left:4px}
+.pcell .st{font:600 13px/18px Pretendard;color:var(--g400);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pcell.ok .st{color:#7fd3d6}
+.pcell.err{border-color:var(--coral-60);background:rgba(237,127,116,.2);cursor:pointer}
+.pcell.err .st{color:#ffb4ab}
+.pcell.err .st b{font-weight:700;color:#ffd2cc}
+.pcell.err::after{content:"";position:absolute;right:9px;bottom:12px;width:6px;height:6px;border:solid #ffb4ab;border-width:1.5px 1.5px 0 0;transform:rotate(45deg)}
+.pcell.now{border-color:#fff;border-width:2px;background:rgba(255,255,255,.14)}
+.pcell.now.err{background:rgba(237,127,116,.3)}
+.pcell .live{position:absolute;left:8px;top:-9px;display:flex;align-items:center;gap:4px;padding:0 6px;border-radius:4px;background:#fff;font:700 10px/16px Pretendard;color:var(--g900)}   /* 현재 검수 중 꼬리표 (테두리 위에 걸침) */
+.pcell .live i{width:6px;height:6px;border-radius:50%;background:#ef4444;animation:blink 1s infinite}
+.pcell.next{border-style:dashed;background:none;color:var(--g400);font:500 12px/16px Pretendard;align-items:center;flex-basis:auto;padding:0 14px;animation:none}
+/* 오류 환자 전체 보기: 촬영은 멈추지 않고 화면 오른쪽에 겹쳐 띄움 */
+.ppanel{position:absolute;z-index:8;right:16px;top:56px;bottom:80px;width:288px;background:#faf9f6;border-radius:12px;color:var(--g900);display:none;flex-direction:column;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.35)}
+.ppanel.on{display:flex;animation:pin .2s ease}
+.ppanel .pp-head{display:flex;align-items:center;gap:6px;padding:10px 8px 8px 14px;font:600 15px/22px Pretendard;letter-spacing:-.25px}
+.ppanel .pp-head small{font:500 12px/18px Pretendard;color:var(--g400);margin-left:4px}
+.ppanel .pp-head button{margin-left:auto;width:28px;height:28px;flex:none;display:flex;align-items:center;justify-content:center;color:var(--g500);border-radius:6px}
+.ppanel .pp-body{flex:1;overflow-y:auto;padding:0 12px 12px;display:flex;flex-direction:column;gap:6px}
+.ppanel .pouch{aspect-ratio:16/9}
+
 .camhead{height:48px;flex:none;display:flex;align-items:center;padding:0 16px;gap:8px}
 .camhead .info{width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:8px}
 .camhead .title{flex:1;display:flex;justify-content:center;gap:12px;font:700 20px/28px Pretendard}
@@ -260,49 +287,6 @@ button{font:inherit;border:0;background:none;cursor:pointer;color:inherit}
 .field{width:100%;height:44px;border:1px solid var(--g300);border-radius:8px;padding:0 12px;font:400 15px Pretendard;color:var(--g700);margin-bottom:16px;background:#fff}
 .row2{display:flex;gap:8px}
 
-/* 분석 로딩 */
-#loading{background:var(--g150);align-items:center;justify-content:center}
-/* 로딩 애니메이션 (loading_animation/preview.html 최신본) */
-#loading{--ld-scan:4.4s;--ld-ease:cubic-bezier(.45,0,.4,1)}
-.ld-scene{position:relative;width:150px;height:184px;margin-bottom:44px;flex:none}
-.ld-bracket{position:absolute;width:16px;height:16px;border:2.5px solid var(--g300);animation:ldFrame var(--ld-scan) ease-in-out infinite}
-.ld-bracket.tl{top:-12px;left:-12px;border-right:0;border-bottom:0;border-top-left-radius:6px;--dx:-3px;--dy:-3px}
-.ld-bracket.tr{top:-12px;right:-12px;border-left:0;border-bottom:0;border-top-right-radius:6px;--dx:3px;--dy:-3px}
-.ld-bracket.bl{bottom:-12px;left:-12px;border-right:0;border-top:0;border-bottom-left-radius:6px;--dx:-3px;--dy:3px}
-.ld-bracket.br{bottom:-12px;right:-12px;border-left:0;border-top:0;border-bottom-right-radius:6px;--dx:3px;--dy:3px}
-@keyframes ldFrame{0%,100%{transform:translate(0,0)}50%{transform:translate(var(--dx),var(--dy))}}
-.ld-card{position:absolute;inset:0;background:#fff;border:2.5px solid var(--g200);border-radius:16px;overflow:hidden}
-.ld-seal{position:absolute;left:18px;right:18px;top:22px;height:5px;border-radius:3px;background:var(--g200)}
-.ld-pills{position:absolute;inset:0}
-.ld-pill{position:absolute;border-radius:999px}
-.ld-pill.p1{width:58px;height:21px;left:22px;top:58px;transform:rotate(-28deg)}
-.ld-pill.p2{width:46px;height:17px;left:80px;top:100px;transform:rotate(24deg)}
-.ld-pill.p3{width:30px;height:30px;left:48px;top:132px;border-radius:50%}
-.ld-gray .p1,.ld-gray .p2{background:linear-gradient(90deg,var(--g200) 50%,var(--g300) 50%)}
-.ld-gray .p3{background:var(--g300)}
-.ld-color .p1{background:linear-gradient(90deg,#BEE4E5 50%,var(--teal-60) 50%)}
-.ld-color .p2{background:linear-gradient(90deg,#FFD9D3 50%,var(--coral-60) 50%)}
-.ld-color .p3{background:#9CD3D5}
-.ld-pill.p3::after{content:"";position:absolute;left:6px;right:6px;top:14px;height:2px;border-radius:1px;background:rgba(255,255,255,.7);transform:rotate(-20deg)}
-.ld-pills.ld-color{animation:ldReveal var(--ld-scan) var(--ld-ease) infinite}
-@keyframes ldReveal{0%{clip-path:inset(0 0 100% 0)}45%,50%{clip-path:inset(0 0 0 0)}95%,100%{clip-path:inset(0 0 100% 0)}}
-.ld-scanline{position:absolute;left:-8px;right:-8px;top:0;height:2px;border-radius:1px;z-index:1;background:var(--teal-60);box-shadow:0 0 10px 2px rgba(10,160,165,.4);animation:ldScan var(--ld-scan) var(--ld-ease) infinite}
-@keyframes ldScan{0%{transform:translateY(0)}45%,50%{transform:translateY(182px)}95%,100%{transform:translateY(0)}}
-.ld-scanline::before,.ld-scanline::after{content:"";position:absolute;left:0;right:0;height:36px}
-.ld-scanline::before{bottom:2px;background:linear-gradient(to top,rgba(10,160,165,.16),rgba(10,160,165,0));animation:ldTrailDown var(--ld-scan) linear infinite}
-.ld-scanline::after{top:2px;background:linear-gradient(to bottom,rgba(10,160,165,.16),rgba(10,160,165,0));animation:ldTrailUp var(--ld-scan) linear infinite}
-@keyframes ldTrailDown{0%,42%{opacity:1}48%,97%{opacity:0}100%{opacity:1}}
-@keyframes ldTrailUp{0%,47%{opacity:0}53%,92%{opacity:1}98%,100%{opacity:0}}
-#loading h2{font:700 20px/28px Pretendard;color:var(--g700)}
-#loading .sub{font:400 15px/24px Pretendard;color:var(--g400);letter-spacing:-.3px;margin-top:6px}
-#loading .steps{display:flex;flex-direction:column;gap:8px;width:calc(100% - 128px);margin-top:44px}   /* 좌우 64 (360: 232, 412: 284) */
-#loading .step{background:var(--g50);border-radius:12px;padding:12px;display:flex;align-items:center;gap:6px;font:400 15px/24px Pretendard;color:var(--g600);letter-spacing:-.3px}
-#loading .step .spin{width:24px;height:24px;flex:none;display:block}
-#loading .step .spin svg{display:block}
-#loading .step.run .spin{animation:rot 1s linear infinite}
-#loading .step .ok{width:24px;height:24px;display:none;flex:none}
-#loading .step.done .spin{display:none}
-#loading .step.done .ok{display:block;animation:pop .3s ease}
 @keyframes rot{to{transform:rotate(360deg)}}
 @keyframes pop{from{transform:scale(.4)}to{transform:none}}
 
@@ -571,7 +555,8 @@ button{font:inherit;border:0;background:none;cursor:pointer;color:inherit}
         <button class="btn primary shoot tap" id="shootBtn">촬영 종료</button>
       </div>
     </div>
-    <div class="cambottom"></div>
+    <div class="cambottom" id="camStrip" aria-label="환자별 실시간 검수 결과"></div>
+    <div class="ppanel" id="ppanel" role="dialog" aria-labelledby="ppTitle"><div class="pp-head"><span id="ppTitle"></span><button id="ppClose" aria-label="닫기"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div><div class="pp-body" id="ppBody"></div></div>
     <div class="dim center sysdim" id="permDim"><div class="sysdlg" role="dialog" aria-label="카메라 권한 확인">
       <svg class="sysic" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M9.4 4 7.6 6H4.5A2.5 2.5 0 0 0 2 8.5v10A2.5 2.5 0 0 0 4.5 21h15a2.5 2.5 0 0 0 2.5-2.5v-10A2.5 2.5 0 0 0 19.5 6h-3.1l-1.8-2H9.4ZM12 9a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9Zm0 2a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z"/></svg>
       <p class="systxt"><b>필터(Pilter)</b>에서 사진 및 동영상을 촬영하도록 허용할까요?</p>
@@ -600,23 +585,6 @@ button{font:inherit;border:0;background:none;cursor:pointer;color:inherit}
       <p>검사하려면 카메라 권한이 필요해요. 설정에서 권한을 허용해 주세요.</p>
       <div class="row2"><button class="btn line tap" id="denyHome">홈으로</button><button class="btn primary tap" id="denyRetry">다시 요청</button></div>
     </div></div>
-  </section>
-
-  <!-- 분석 로딩 -->
-  <section class="screen" id="loading">
-    <div class="ld-scene" aria-hidden="true">
-      <span class="ld-bracket tl"></span><span class="ld-bracket tr"></span>
-      <span class="ld-bracket bl"></span><span class="ld-bracket br"></span>
-      <div class="ld-card">
-        <div class="ld-seal"></div>
-        <div class="ld-pills ld-gray"><span class="ld-pill p1"></span><span class="ld-pill p2"></span><span class="ld-pill p3"></span></div>
-        <div class="ld-pills ld-color"><span class="ld-pill p1"></span><span class="ld-pill p2"></span><span class="ld-pill p3"></span></div>
-      </div>
-      <div class="ld-scanline"></div>
-    </div>
-    <h2>영상을 분석하고 있어요</h2>
-    <p class="sub">잠시만 기다려주세요</p>
-    <div class="steps" id="steps"></div>
   </section>
 
   <!-- 검사 상세 -->
@@ -986,6 +954,7 @@ function enterCamera(){
   $('#camTimer').textContent = '00:00'; $('#camState').textContent = '검사 중';
   $('#camToast').textContent = '카메라 준비 중..';
   camVideo.classList.remove('live'); camVideo.pause(); camVideo.currentTime = 0;
+  closePanel(); renderStrip(true);
   if (camPerm === 'allow') $('#guideDim').classList.add('on');
   else $('#permDim').classList.add('on');
 }
@@ -1008,10 +977,57 @@ function startCamera(){
   camTimerId = setInterval(() => {
     const s = Math.floor(camVideo.currentTime);
     $('#camTimer').textContent = `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
+    renderStrip();
   }, 250);
 }
 camVideo.onended = () => finishShoot();
-function stopCamera(){ clearInterval(camTimerId); camVideo.pause(); ['#permDim','#guideDim','#denyDim','#exitDim'].forEach(s=>$(s).classList.remove('on')); }
+
+/* ---------- 실시간 환자 띠 ---------- */
+// 영상이 지나간 봉지까지만 환자별로 묶어, 오류 봉지 번호(환자 안에서 센 번호)를 바로 보여 준다
+function liveState(t){
+  const gs = patientGroups(BAG_COUNT);
+  return gs.map((g,i) => {
+    const errs = ANOMALIES.filter(a => g.includes(a.bag) && t >= a.start).map(a => ({...a, local: g.indexOf(a.bag)+1}));
+    const started = t >= bagTime(g[0]) - 0.6;
+    const next = gs[i+1];
+    const now = started && (!next || t < bagTime(next[0]) - 0.6);
+    return {i, g, errs, started, now};
+  }).filter(p => p.started);
+}
+let stripSig = '';
+function renderStrip(force){
+  const t = camVideo.classList.contains('live') ? camVideo.currentTime : -1;
+  const ps = t < 0 ? [] : liveState(t);
+  const sig = JSON.stringify(ps.map(p => [p.i, p.now, p.errs.length]));
+  if (!force && sig === stripSig) return;
+  stripSig = sig;
+  const el = $('#camStrip');
+  const cells = ps.map(p => {
+    const st = p.errs.length ? 'err' : 'ok';
+    const tag = st === 'err' ? 'button' : 'div';
+    const txt = p.errs.length ? `<b>${p.errs.map(e=>e.local).join(', ')}번</b> 포 오류` : p.now ? '이상 없음' : '정상';
+    return `<${tag} class="pcell ${st} ${p.now?'now':''}" ${st==='err'?`data-pcell="${p.i}" aria-label="환자${p.i+1} 오류 전체 보기"`:''}>${p.now ? '<span class="live"><i></i>검수 중</span>' : ''}<span class="nm">환자${p.i+1}<small>${PATIENT_NAMES[p.i]}님</small></span><span class="st">${txt}</span></${tag}>`;
+  });
+  const left = patientGroups(BAG_COUNT).length - ps.length;
+  el.innerHTML = (cells.join('') || '<div class="pcell next">약봉지를 비추면 환자별 결과가 여기에 떠요</div>') + (ps.length && left > 0 ? '<div class="pcell next">다음 환자 대기</div>' : '');
+  el.querySelectorAll('[data-pcell]').forEach(b => b.onclick = () => openPanel(+b.dataset.pcell));
+  const nowEl = el.querySelector('.now'); if (nowEl) el.scrollLeft = Math.max(0, nowEl.offsetLeft + nowEl.offsetWidth - el.clientWidth + 16);
+  if ($('#ppanel').classList.contains('on')) openPanel(+$('#ppanel').dataset.p, true);
+}
+// 오류 환자 전체 보기 (촬영은 계속 진행)
+function openPanel(i, refresh){
+  const p = liveState(camVideo.currentTime).find(x => x.i === i); if (!p) return;
+  const sig = `${i}:${p.errs.length}`;
+  if (refresh && $('#ppanel').dataset.sig === sig) return;
+  $('#ppanel').dataset.p = i; $('#ppanel').dataset.sig = sig;
+  $('#ppTitle').innerHTML = `환자${i+1}(${PATIENT_NAMES[i]})님<small>${p.g.length}포 중 ${p.errs.length}포 오류</small>`;
+  $('#ppBody').innerHTML = p.errs.map(e => `<div class="bag errbag"><span class="n">${e.local}번 봉지<span class="why">${e.why}</span></span>${statusIcon('err')}</div>`).join('') +
+    `<img class="pouch" src="${sampleImg(i % 5 + 1)}" alt="환자${i+1} 약봉지 이미지">`;
+  $('#ppanel').classList.add('on');
+}
+function closePanel(){ $('#ppanel').classList.remove('on'); }
+$('#ppClose').onclick = closePanel;
+function stopCamera(){ clearInterval(camTimerId); closePanel(); camVideo.pause(); ['#permDim','#guideDim','#denyDim','#exitDim'].forEach(s=>$(s).classList.remove('on')); }
 $('#camClose').onclick = () => {
   // 검사 중일 때만 확인 모달을 띄운다. 권한·가이드 단계에서는 바로 나간다.
   if (camVideo.classList.contains('live') && !camVideo.paused){ camVideo.pause(); $('#exitDim').classList.add('on'); return; }
@@ -1023,52 +1039,20 @@ $('#shootBtn').onclick = () => finishShoot();
 function finishShoot(){
   if (current !== 'camera') return;
   stopCamera();
-  stack.length = 0; stack.push('home');
-  show('loading', {push:false});
-}
-
-/* ---------- 분석 로딩 ---------- */
-const STEPS = [['영상 첨부'],['AI 분석'],['결과 생성']];
-const STEP_LABEL = {wait:'대기 중', run:'중', done:'완료'};
-let loadTimers = [];
-function runLoading(){
-  // 이전에 예약된 단계·이동 타이머를 모두 취소하고 처음부터 다시 시작
-  loadTimers.forEach(clearTimeout);
-  loadTimers = [];
-  const later = (fn, t) => loadTimers.push(setTimeout(fn, t));
-  const el = $('#steps');
-  // 단계 줄은 화면에 들어올 때 한 번만 만든다 (innerHTML 전체 재생성 금지)
-  el.innerHTML = STEPS.map(() => `<div class="step"><span class="spin"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8.5" stroke="var(--g200)" stroke-width="2.5"/><path d="M12 3.5a8.5 8.5 0 1 1-8.5 8.5" stroke="var(--teal-60)" stroke-width="2.5" stroke-linecap="round"/></svg></span><img class="ok" src="assets/ic_check.svg" alt=""><span class="lbl"></span></div>`).join('');
-  const cur = STEPS.map(() => null);
-  // 상태가 바뀐 줄만 고친다. 같은 상태면 아무것도 하지 않아서 완료 아이콘이 다시 뜨지 않는다
-  const setStep = (k, st) => {
-    if (cur[k] === st) return;
-    cur[k] = st;
-    const row = el.children[k];
-    row.className = st === 'wait' ? 'step' : `step ${st}`;
-    row.querySelector('.lbl').textContent = `${STEPS[k][0]} ${STEP_LABEL[st]}`;
-  };
-  // i번째 단계가 진행 중(run)이면 그 앞은 모두 완료
-  const paint = (i, phase) => STEPS.forEach((_, k) =>
-    setStep(k, k < i ? 'done' : (k === i && phase === 'run') ? 'run' : 'wait'));
-  paint(0,'wait');
-  const seq = [[0,'run',500],[1,'run',1400],[2,'run',2600],[3,'done',3600]];
-  seq.forEach(([i,p,t]) => later(()=>{ if(current==='loading') paint(i,p); }, t));
-  later(()=>{
-    if (current !== 'loading') return;
-    const n = new Date();
-    const r = makeRecord(`new${Date.now()}`, new Date(TODAY), n.getHours(), n.getMinutes(), 'err');
-    r.s = n.getSeconds();
-    DB[key(TODAY)].unshift(r); lastNewId = r.id;
-    histDate = new Date(TODAY);
-    openDetail(r.id, {fromResult:true});
-  }, 4300);
+  // 분석 화면(로딩)은 없앰: 촬영 중에 이미 실시간으로 검수했으므로 바로 분석 결과로 간다
+  const n = new Date();
+  const r = makeRecord(`new${Date.now()}`, new Date(TODAY), n.getHours(), n.getMinutes(), 'err');
+  r.s = n.getSeconds();
+  DB[key(TODAY)].unshift(r); lastNewId = r.id;
+  histDate = new Date(TODAY);
+  openDetail(r.id, {fromResult:true});
 }
 
 /* ---------- 검사 상세 + 다시보기 빨간 깜빡임 ---------- */
 const pVideo = $('#pVideo');
 let dRec = null, dByPatient = false;
-const PATIENTS = 3;
+const PATIENTS = 4;
+const PATIENT_NAMES = ['홍길동','김영희','이민준','박서연'];
 // 환자 카드 안 봉지 상태 (환자 카드에는 오류·실패 봉지만 나열하고 정상 봉지는 뺌): 색을 채운 동그라미 + 흰 아이콘 (정상 체크, 오류·실패 느낌표)
 function statusIcon(st){
   const mark = st==='ok'
@@ -1154,7 +1138,7 @@ function renderDetail(){
     $('#dBagTitle').textContent = '환자별 검사 결과';
     $('#dBagCount').textContent = pts.length;
     $('#dBags').innerHTML = pts.map(({g,i,st}) =>
-      `<div class="patient ${st} ${st!=='ok'?'open':''}"><button class="phead tap" data-patient><img class="pava" src="${PATIENT_IMG[i % PATIENT_IMG.length]}" alt=""><span class="ptxt"><span class="pname">환자 ${i+1}</span><span class="psub">${st==='fail' ? r.failReason : patternText(r.patterns[i % r.patterns.length])}</span></span>${badge(st)}<img class="chev" src="assets/chevron_right.svg" alt=""></button><div class="pbody"><div>${st==='fail' && !hasPhoto(r) ? NO_PHOTO : `<img class="pouch" src="${sampleImg((idHash(r.id) + i) % 5 + 1)}" alt="환자 ${i+1} 약봉지 이미지">`}${st==='fail' ? '' : sortBad(g).filter(n => bad.has(n) || r.failBags.includes(n)).map(n => bagHTML(n, g.indexOf(n)+1, true)).join('')}</div></div></div>`
+      `<div class="patient ${st} ${st!=='ok'?'open':''}"><button class="phead tap" data-patient><img class="pava" src="${PATIENT_IMG[i % PATIENT_IMG.length]}" alt=""><span class="ptxt"><span class="pname">환자 ${i+1} (${PATIENT_NAMES[i % PATIENT_NAMES.length]})</span><span class="psub">${st==='fail' ? r.failReason : patternText(r.patterns[i % r.patterns.length])}</span></span>${badge(st)}<img class="chev" src="assets/chevron_right.svg" alt=""></button><div class="pbody"><div>${st==='fail' && !hasPhoto(r) ? NO_PHOTO : `<img class="pouch" src="${sampleImg((idHash(r.id) + i) % 5 + 1)}" alt="환자 ${i+1} 약봉지 이미지">`}${st==='fail' ? '' : sortBad(g).filter(n => bad.has(n) || r.failBags.includes(n)).map(n => bagHTML(n, g.indexOf(n)+1, true)).join('')}</div></div></div>`
     ).join('');
   } else {
     // 오류·실패 봉지만 하나씩 나열한다. 모두 정상이면 정상 한 줄로 묶어 보여 준다
@@ -1217,7 +1201,6 @@ const ENTER = {
   settings: () => { $('#settings .tabbar').innerHTML = renderTabbar('settings'); },
   stats: renderStats,
   camera: enterCamera,
-  loading: runLoading,
   detail: () => { if (current==='detail' && dRec) renderDetail(); },
   replay: enterReplay,
 };
