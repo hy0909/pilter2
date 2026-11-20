@@ -233,6 +233,15 @@ button{font:inherit;border:0;background:none;cursor:pointer;color:inherit}
 .camtrack{position:absolute;inset:0;display:none}   /* 권한 창·촬영 가이드가 떠 있는 동안은 사진을 아예 그리지 않음 (화면 검정) */
 .camtrack.live{display:block}
 .cstrip{position:absolute;will-change:transform}
+/* 촬영 가이드 영역: 화면 네 모서리의 흰 꺾쇠. 오른쪽 패널에서 있음/없음을 바꿔 볼 수 있음 */
+.camguide{position:absolute;left:20px;right:20px;top:62px;bottom:62px;pointer-events:none;z-index:3;display:none}
+.camtrack.live ~ .camguide{display:block}
+.device.noguide .camguide{display:none}
+.camguide i{position:absolute;width:24px;height:24px;border:0 solid #fff}
+.camguide .tl{left:0;top:0;border-left-width:3px;border-top-width:3px}
+.camguide .tr{right:0;top:0;border-right-width:3px;border-top-width:3px}
+.camguide .bl{left:0;bottom:0;border-left-width:3px;border-bottom-width:3px}
+.camguide .br{right:0;bottom:0;border-right-width:3px;border-bottom-width:3px}
 .camblink{position:absolute;inset:0;background:#0f172a;opacity:0;pointer-events:none;z-index:2}
 .cstrip>img{position:absolute;inset:0;width:100%;height:100%;display:block}
 /* 디텍션 박스: 알약이 화면에 들어오면 하나씩 잡히고, 추론 주기마다 테두리가 미세하게 흔들림 */
@@ -702,6 +711,8 @@ button{font:inherit;border:0;background:none;cursor:pointer;color:inherit}
 <nav class="jump">
   <b>화면 크기</b>
   <div class="dwsel"><button data-dw="360" class="on">최소 360</button><button data-dw="412">최대 412</button></div>
+  <b>가이드 영역</b>
+  <div class="dwsel"><button data-guide="on" class="on">있음</button><button data-guide="off">없음</button></div>
   <b>화면 바로가기</b>
   <button data-jump="splash">스플래시</button>
   <button data-jump="onboarding">온보딩</button>
@@ -1099,7 +1110,7 @@ const rnd = n => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x 
     d.conf = 0.55 + rnd(d.id + 7) * 0.45;   // 신뢰도가 낮은 박스일수록 가끔 깜빡임
   }));
   $('#camStage').innerHTML = `<div class="camtrack" id="camTrack">${SCENES.map((sc, i) =>
-    `<div class="cstrip" style="left:0;top:${sc.top}px;width:${sc.w}px;height:${sc.h}px;visibility:hidden"><img src="${sc.img}" alt="">${sc.dets.map(d => `<div class="db${d.bad ? ' inerr' : ''}" data-d="${d.id}"></div>`).join('')}${sc.pd ? `<div class="dp" data-d="${sc.pd.id}"><i>!</i></div>` : ''}</div>`).join('')}</div><div class="camblink" id="camBlink"></div>`;
+    `<div class="cstrip" style="left:0;top:${sc.top}px;width:${sc.w}px;height:${sc.h}px;visibility:hidden"><img src="${sc.img}" alt="">${sc.dets.map(d => `<div class="db${d.bad ? ' inerr' : ''}" data-d="${d.id}"></div>`).join('')}${sc.pd ? `<div class="dp" data-d="${sc.pd.id}"><i>!</i></div>` : ''}</div>`).join('')}</div><div class="camblink" id="camBlink"></div><div class="camguide" aria-hidden="true"><i class="tl"></i><i class="tr"></i><i class="bl"></i><i class="br"></i></div>`;
   SCENES.forEach(sc => [...sc.dets, ...(sc.pd ? [sc.pd] : [])].forEach(d => d.el = $('#camStage').querySelector(`[data-d="${d.id}"]`)));
 })();
 const sceneEnd = i => SCENES[i+1] ? SCENES[i+1].start : CAM_LEN;
@@ -1420,6 +1431,11 @@ document.querySelectorAll('[data-dw]').forEach(b => b.onclick = () => {
   document.querySelectorAll('[data-dw]').forEach(x => x.classList.toggle('on', x === b));
   device.style.setProperty('--dh', big ? '915px' : '640px');
   setTimeout(fit, 380);
+});
+// 촬영 화면 가이드 영역(네 모서리 꺾쇠) 있음/없음 비교
+document.querySelectorAll('[data-guide]').forEach(b => b.onclick = () => {
+  device.classList.toggle('noguide', b.dataset.guide === 'off');
+  document.querySelectorAll('[data-guide]').forEach(x => x.classList.toggle('on', x === b));
 });
 show('splash', {push:false});
 </script>
