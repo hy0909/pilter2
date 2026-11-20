@@ -225,17 +225,21 @@ button{font:inherit;border:0;background:none;cursor:pointer;color:inherit}
 #camera .camtoast{position:absolute;left:50%;top:52px;transform:translateX(-50%);z-index:6;white-space:nowrap;transition:opacity .25s}
 #camera .camtoast[hidden]{display:block;opacity:0;pointer-events:none}
 /* 촬영 장면: 피그마 화면별 실제 약포지 사진 위에 디텍션 박스를 얹고, 사진과 박스를 한 덩어리로 움직임 */
-.camstage{position:absolute;left:50%;top:50%;width:640px;height:360px;transform:translate(-50%,-50%);overflow:hidden;background:var(--g800)}
+#camera .feed{background:#000}
+.camstage{position:absolute;left:50%;top:50%;width:640px;height:360px;transform:translate(-50%,-50%);overflow:hidden;background:#000}
 .device.w412 .camstage{transform:translate(-50%,-50%) scale(1.4297)}
-.cscene{position:absolute;visibility:hidden}
-.cscene>img{position:absolute;inset:0;width:100%;height:100%;display:block}
-.cscene .db{position:absolute;background:rgba(10,160,165,.15);border:1px solid #0aa0a5;opacity:0;transition:opacity .3s,background-color .25s,border-color .25s}
-.cscene.boxes .db{opacity:1}
-/* 오류가 잡히면 다른 알약은 흰 박스, 오류 봉지는 봉지 전체를 진한 핑크로 감싸고 느낌표가 봉지를 따라다님 */
-.cscene.err .db{background:rgba(255,255,255,.1);border-color:rgba(226,232,240,.6)}
-.cscene .dp{position:absolute;display:none;border:3px solid #ff3780;box-shadow:2px 2px 12px rgba(0,0,0,.25),0 0 14px rgba(255,55,128,.75)}
-.cscene.err .dp{display:block}
-.cscene .dp i{position:absolute;right:-15px;top:-15px;width:28px;height:28px;border-radius:50%;background:#ffea00;color:#111;font:900 19px/28px Pretendard;font-style:normal;text-align:center;box-shadow:0 0 0 2px #111,0 0 14px 4px rgba(255,234,0,.85);animation:errpulse .55s ease-in-out infinite alternate}
+/* 약포지 사진을 끊김 없이 한 줄로 이어 붙인 띠. 권한·촬영 가이드 단계에서는 숨겨서 화면을 검정으로 둠 */
+.camtrack{position:absolute;left:0;top:0;height:360px;will-change:transform;visibility:hidden}
+.camtrack.live{visibility:visible}
+.cstrip{position:absolute}
+.cstrip>img{position:absolute;inset:0;width:100%;height:100%;display:block}
+/* 디텍션 박스: 알약이 화면에 들어오면 하나씩 잡히고, 추론 주기마다 테두리가 미세하게 흔들림 */
+.cstrip .db,.cstrip .dp{position:absolute;opacity:0;pointer-events:none}
+.cstrip .db{background:rgba(10,160,165,.15);border:1px solid #0aa0a5;transition:background-color .2s,border-color .2s}
+.camtrack.err .db{background:rgba(255,255,255,.1);border-color:rgba(226,232,240,.6)}
+.camtrack .cstrip.bad .db.inerr{background:rgba(255,59,59,.22);border:1.5px solid #ff3b3b}
+.cstrip .dp{border:3px solid #ff3780;box-shadow:2px 2px 12px rgba(0,0,0,.25),0 0 14px rgba(255,55,128,.75)}
+.cstrip .dp i{position:absolute;right:-15px;top:-15px;width:28px;height:28px;border-radius:50%;background:#ffea00;color:#111;font:900 19px/28px Pretendard;font-style:normal;text-align:center;box-shadow:0 0 0 2px #111,0 0 14px 4px rgba(255,234,0,.85);animation:errpulse .55s ease-in-out infinite alternate}
 @keyframes errpulse{from{transform:scale(.9)}to{transform:scale(1.15)}}
 /* 환자 카드 줄: 새 환자가 왼쪽에 들어오고 앞 환자는 오른쪽으로 밀려남 */
 #camera .cambottom{position:absolute;left:0;right:0;bottom:0;height:60px;padding:8px 12px;background:none;display:flex;align-items:center;gap:8px;overflow:visible;z-index:5}
@@ -379,6 +383,14 @@ button{font:inherit;border:0;background:none;cursor:pointer;color:inherit}
 #detail #player{display:none}   /* 영상은 어느 화면에서도 보이지 않음 */
 .dpouch{display:none;width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:12px;border:1px solid var(--g300);background:var(--g200)}
 #detail:not(.byp) .dpouch{display:block}   /* 검사 상세: 약봉지 이미지 한 장 */
+.pview{position:relative;width:100%;aspect-ratio:4/3;overflow:hidden;border-radius:8px;border:1px solid var(--g300);background:var(--g200)}
+.pview .pv{position:absolute}
+.pview .pv>img{position:absolute;inset:0;width:100%;height:100%;display:block}
+.pview .pv b{position:absolute;background:rgba(10,160,165,.15);border:1px solid #0aa0a5}
+.pview.err .pv b{background:rgba(255,255,255,.12);border-color:rgba(226,232,240,.75)}
+.pview.err .pv b.bad{background:rgba(255,59,59,.22);border:1.5px solid #ff3b3b}
+.pview .pv u{position:absolute;border:3px solid #ff3780;box-shadow:2px 2px 12px rgba(0,0,0,.25)}
+.pview .pv u i{position:absolute;right:-12px;top:-12px;width:22px;height:22px;border-radius:50%;background:#ffea00;color:#111;font:900 15px/22px Pretendard;font-style:normal;text-align:center;box-shadow:0 0 0 2px #111}
 .pouch{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:8px;border:1px solid var(--g300);background:var(--g200)}
 .phead .pava{width:28px;height:28px;border-radius:50%;flex:none;object-fit:cover}
 .phead .ptxt{flex:1;display:flex;flex-direction:column;gap:2px;min-width:0}
@@ -976,7 +988,7 @@ $('#guideAgain').onclick = () => { onbIdx = 0; renderOnb(); show('onboarding'); 
 
 /* ---------- 카메라 ---------- */
 /* 촬영 장면 시계: 영상 대신 사진 장면을 시간에 맞춰 그리므로, 영상처럼 재생·멈춤·되감기를 흉내 낸다 */
-const CAM_LEN = 26.4;
+let CAM_LEN = 30;   // 아래에서 약포지 띠 길이로 다시 계산
 const camVideo = (() => {
   const el = document.createElement('i'); let t = 0, last = 0, paused = true;
   const o = {
@@ -1028,55 +1040,103 @@ function startCamera(){
 camVideo.onended = () => finishShoot();
 
 /* ---------- 촬영 장면 (피그마 159:5448) ---------- */
-// place: 피그마에서 사진을 놓은 자리 [x, y, 너비, 높이], boxes: 같은 화면 기준 알약 박스, pouch: 오류 봉지 전체
+// 환자마다 피그마 화면의 사진과 박스 위치를 그대로 쓴다. place: 피그마에서 사진을 놓은 자리 [x, y, 너비, 높이]
+// boxes·pouch: 같은 피그마 화면 기준 좌표. 사진끼리는 빈틈 없이 이어 붙여 카메라가 약포지 위를 계속 훑는 것처럼 보이게 한다
 const SCENES = [
-  { img:'assets/cam/strip_p1.jpg', start:RECOG_END, place:[-50,-223,1075,806], recog:[0,-191,1012,759],
-    boxes:[[66,206,37,20],[25,247,48,42],[70,253,52,27],[116,266,25,23],[230,247,51,33],[385,249,24,24],[403,219,22,36],[419,198,61,26],[563,213,37,45],[592,219,32,59],[569,258,23,22],[423,249,50,26],[419,223,47,26],[48,226,70,29],[619,231,25,44]] },
-  { img:'assets/cam/strip_p2.jpg', start:8.4, place:[-50,-223,1075,806],
-    boxes:[[0,230,28,25],[22,245,48,43],[7,270,30,30],[74,275,29,25],[182,240,55,23],[174,257,31,31],[400,204,28,26],[367,245,28,18],[387,231,45,42],[356,256,28,29],[411,256,29,30],[514,232,25,25],[536,224,20,51],[509,259,29,29],[559,254,25,26],[686,247,29,30]] },
-  { img:'assets/cam/strip_p3.jpg', start:14.4, place:[-454,-267,1094,820], errAt:15.6, errEnd:18.6,
-    pouch:[301,57,164,240],
-    boxes:[[504,251,21,21],[525,237,48,27],[553,214,52,54],[561,189,39,29],[155,220,29,48],[180,213,28,19],[184,232,62,26],[200,258,46,26],[251,274,21,17],[27,224,28,23],[-5,229,20,23],[10,232,43,32],[-31,251,79,36]] },
-  { img:'assets/cam/strip_p4.jpg', start:20.4, place:[0,-286,1180,885],
-    boxes:[[469,230,44,23],[250,187,28,46],[264,228,28,25],[287,245,39,29],[311,188,24,26],[278,197,39,51],[92,224,28,21],[85,234,54,37],[130,248,47,26],[137,219,45,29],[149,197,28,29],[431,167,40,50],[440,217,23,24],[428,239,45,28],[487,203,29,28],[588,223,29,42],[609,218,39,27],[617,174,39,27]] },
+  { img:'assets/cam/strip_p1.jpg', place:[-50,-223,1075,806],
+    boxes:[[66,206,37,20],[25,247,48,42],[70,253,52,27],[116,266,25,23],[230,247,51,33],[385,249,24,24],[403,219,22,36],[419,198,61,26],[563,213,37,45],[592,219,32,59],[569,258,23,22],[423,249,50,26],[419,223,47,26],[48,226,70,29],[619,231,25,44]],
+    extra:[[662,390,34,16],[784,479,47,22],[939,385,38,56],[962,420,30,28],[964,443,48,33],[979,465,36,25]], crop:[40,250,560,420] },
+  { img:'assets/cam/strip_p2.jpg', place:[-50,-223,1075,806],
+    boxes:[[0,230,28,25],[22,245,48,43],[7,270,30,30],[74,275,29,25],[182,240,55,23],[174,257,31,31],[400,204,28,26],[367,245,28,18],[387,231,45,42],[356,256,28,29],[411,256,29,30],[514,232,25,25],[536,224,20,51],[509,259,29,29],[559,254,25,26],[686,247,29,30]],
+    extra:[[782,408,29,53],[913,432,27,25],[886,452,28,27],[928,442,52,33],[903,468,31,29],[883,493,27,18]], crop:[30,250,560,420] },
+  { img:'assets/cam/strip_p3.jpg', place:[-454,-267,1094,820], pouch:[301,57,164,240],
+    boxes:[[504,251,21,21],[525,237,48,27],[553,214,52,54],[561,189,39,29],[155,220,29,48],[180,213,28,19],[184,232,62,26],[200,258,46,26],[251,274,21,17],[27,224,28,23],[-5,229,20,23],[10,232,43,32],[-31,251,79,36]],
+    extra:[[75,487,38,48],[89,529,42,29],[110,507,65,43],[150,497,30,25],[132,544,21,13],[277,504,36,46],[325,512,35,38],[272,529,18,16]],
+    errPills:[[793,503,22,13],[777,513,41,35],[846,467,31,68]], crop:[627,284,420,315] },
+  { img:'assets/cam/strip_p4.jpg', place:[0,-286,1180,885],
+    boxes:[[469,230,44,23],[250,187,28,46],[264,228,28,25],[287,245,39,29],[311,188,24,26],[278,197,39,51],[92,224,28,21],[85,234,54,37],[130,248,47,26],[137,219,45,29],[149,197,28,29],[431,167,40,50],[440,217,23,24],[428,239,45,28],[487,203,29,28],[588,223,29,42],[609,218,39,27],[617,174,39,27]],
+    extra:[[627,481,23,20],[667,426,24,20],[747,438,25,28],[746,481,24,23],[760,486,37,39],[790,508,41,18],[770,522,51,23],[912,488,30,38],[949,476,43,35],[969,503,26,23],[914,523,52,22],[967,525,28,27]], crop:[60,270,560,420] },
 ];
-const SLIDE = 0.6, PAN = 60;   // 새 약포지가 밀려 들어오는 시간(초), 한 약포지를 비추는 동안 옆으로 흐르는 거리(px)
-const ease = x => x < 0 ? 0 : x > 1 ? 1 : 1 - Math.pow(1 - x, 3);
-(function buildScenes(){
-  const pct = (v, o, w) => `${(v - o) / w * 100}%`;
-  $('#camStage').innerHTML = SCENES.map((sc, i) => {
+const RECOG_V = 14, CAM_V = 135;   // 인식 중일 때와 검사 중일 때 카메라가 왼쪽으로 흐르는 속도(px/초)
+const STRIP_LEAD = 30;             // 사진 왼쪽 끝에서 약포지가 시작되는 거리. 이 끝이 화면에 들어오는 순간 새 환자 카드가 뜬다
+const scrollAt = t => t < RECOG_END ? RECOG_V * t : RECOG_V * RECOG_END + CAM_V * (t - RECOG_END);
+const timeAt = x => x <= RECOG_V * RECOG_END ? x / RECOG_V : RECOG_END + (x - RECOG_V * RECOG_END) / CAM_V;
+// 같은 값에서는 늘 같은 결과가 나오는 난수 (되감아도 같은 모습)
+const rnd = n => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+(function buildTrack(){
+  let x = 0;
+  SCENES.forEach((sc, i) => {
     const [L, T, W, H] = sc.place;
-    const box = (b, cls, inner='') => `<div class="${cls}" style="left:${pct(b[0],L,W)};top:${pct(b[1],T,H)};width:${b[2]/W*100}%;height:${b[3]/H*100}%">${inner}</div>`;
-    return `<div class="cscene" data-s="${i}"><img src="${sc.img}" alt="">${sc.boxes.map(b => box(b,'db')).join('')}${sc.pouch ? box(sc.pouch,'dp','<i>!</i>') : ''}</div>`;
-  }).join('');
+    sc.x = x; sc.top = T; sc.w = W; sc.h = H;
+    // 사진 안 좌표로 바꿔 둠 (사진과 박스가 한 덩어리로 움직이도록)
+    // 피그마 박스 + 피그마 화면 밖이라 비어 있던 알약에 더 그린 박스(extra, 사진 기준) + 오류 봉지 안 알약(errPills, 사진 기준)
+    sc.dets = [...sc.boxes.map(b => ({ x:b[0]-L, y:b[1]-T, w:b[2], h:b[3] })),
+               ...(sc.extra || []).map(b => ({ x:b[0], y:b[1], w:b[2], h:b[3] })),
+               ...(sc.errPills || []).map(b => ({ x:b[0], y:b[1], w:b[2], h:b[3], bad:true }))].map((d, j) => ({...d, id:i*100+j}));
+    if (sc.pouch) sc.pd = { x:sc.pouch[0]-L, y:sc.pouch[1]-T, w:sc.pouch[2], h:sc.pouch[3], id:i*100+99 };
+    sc.start = i === 0 ? RECOG_END : timeAt(x + STRIP_LEAD - 640);
+    x += W;
+  });
+  CAM_LEN = timeAt(x - 640);   // 마지막 사진의 오른쪽 끝이 화면 오른쪽에 닿으면 촬영 끝 (빈 배경이 보이지 않게)
+  // 오류 봉지가 화면 안에 다 들어오면(가운데가 x=520) 오류를 잡고, 3초 동안 화면을 빨갛게 깜빡이며 다른 박스를 흰색으로 낮춤
+  SCENES.forEach(sc => { if (sc.pd){ sc.errAt = timeAt(sc.x + sc.pd.x + sc.pd.w / 2 - 520); sc.errEnd = sc.errAt + 3; } });
+  // 박스마다 화면에 들어온 뒤 잡히기까지 걸리는 시간을 조금씩 다르게 (모델이 한 알씩 찾아내는 느낌)
+  SCENES.forEach(sc => [...sc.dets, ...(sc.pd ? [sc.pd] : [])].forEach(d => {
+    d.at = Math.max(timeAt(sc.x + d.x + d.w * 0.6 - 640), RECOG_END) + 0.08 + rnd(d.id) * 0.35;
+    if (d === sc.pd) d.at = sc.errAt;
+    d.conf = 0.55 + rnd(d.id + 7) * 0.45;   // 신뢰도가 낮은 박스일수록 가끔 깜빡임
+  }));
+  $('#camStage').innerHTML = `<div class="camtrack" id="camTrack">${SCENES.map((sc, i) =>
+    `<div class="cstrip" style="left:${sc.x}px;top:${sc.top}px;width:${sc.w}px;height:${sc.h}px"><img src="${sc.img}" alt="">${sc.dets.map(d => `<div class="db${d.bad ? ' inerr' : ''}" data-d="${d.id}"></div>`).join('')}${sc.pd ? `<div class="dp" data-d="${sc.pd.id}"><i>!</i></div>` : ''}</div>`).join('')}</div>`;
+  SCENES.forEach(sc => [...sc.dets, ...(sc.pd ? [sc.pd] : [])].forEach(d => d.el = $('#camStage').querySelector(`[data-d="${d.id}"]`)));
 })();
 const sceneEnd = i => SCENES[i+1] ? SCENES[i+1].start : CAM_LEN;
 const errOn = (sc, t) => sc.errAt != null && t >= sc.errAt;
+const INFER_HZ = 12;   // 모델 추론 주기: 박스 위치는 이 간격으로만 바뀌어 실제 검출 결과처럼 살짝 끊겨 보임
+function drawDet(d, t, tick){
+  const el = d.el;
+  if (t < d.at){ el.style.opacity = 0; return; }
+  const age = t - d.at;
+  // 가끔 한 프레임씩 놓쳤다가 다시 잡음 (신뢰도가 낮은 박스일수록 자주)
+  const drop = age > 0.5 && rnd(d.id * 13 + tick) > 0.97 + (d.conf - 0.55) * 0.06;
+  const j = k => (rnd(d.id * 31 + tick * 7 + k) - 0.5);
+  // 처음 잡힐 때는 조금 크게 잡혔다가 알약 크기에 맞춰 줄어듦
+  const lock = age < 0.18 ? 1 + (1 - age / 0.18) * 0.18 : 1;
+  const w = d.w * lock + j(1) * 2.4, h = d.h * lock + j(2) * 2.4;
+  const x = d.x + d.w / 2 - w / 2 + j(3) * 1.6, y = d.y + d.h / 2 - h / 2 + j(4) * 1.6;
+  el.style.cssText = `left:${x.toFixed(1)}px;top:${y.toFixed(1)}px;width:${w.toFixed(1)}px;height:${h.toFixed(1)}px;opacity:${drop ? 0 : age < 0.12 ? (age / 0.12).toFixed(2) : 1}`;
+}
 function renderScenes(){
   const t = camVideo.currentTime, live = camVideo.classList.contains('live');
   $('#camToast').hidden = live && t >= RECOG_END;
-  let anyErr = false;
+  const track = $('#camTrack');
+  track.classList.toggle('live', live);
+  const off = scrollAt(t);
+  track.style.transform = `translateX(${-off}px)`;
+  const tick = Math.floor(t * INFER_HZ);
+  let anyErr = false, errState = false;
   SCENES.forEach((sc, i) => {
-    const el = $('#camStage').children[i], s0 = i === 0 ? 0 : sc.start, s1 = sceneEnd(i);
-    // 들어올 때: 오른쪽에서 밀려 들어옴, 비추는 동안: 왼쪽으로 천천히 흐름, 나갈 때: 왼쪽으로 빠짐
-    let x;
-    if (t < s0 || t > s1 + SLIDE){ el.style.visibility = 'hidden'; return; }
-    const panFrom = i === 0 ? RECOG_END : sc.start + SLIDE;
-    const pan = -PAN * Math.max(0, Math.min(1, (t - panFrom) / (s1 - panFrom)));
-    if (i > 0 && t < sc.start + SLIDE) x = 640 * (1 - ease((t - sc.start) / SLIDE));
-    else if (t > s1) x = -PAN - 640 * ease((t - s1) / SLIDE);
-    else x = pan;
-    let [L, T, W, H] = sc.place;
-    if (sc.recog){   // 첫 약포지: 인식 중일 때는 조금 멀리, 인식되면 피그마 검사 화면 크기로 다가감
-      const k = ease((t - RECOG_END + 0.5) / 0.5);
-      [L, T, W, H] = sc.recog.map((v, j) => v + (sc.place[j] - v) * k);
-    }
-    Object.assign(el.style, {visibility:'visible', left:`${L + x}px`, top:`${T}px`, width:`${W}px`, height:`${H}px`});
-    el.classList.toggle('boxes', live && t >= sc.start);
-    const e = live && errOn(sc, t); el.classList.toggle('err', e); anyErr = anyErr || (e && t <= sc.errEnd);
+    const visible = sc.x - off < 640 && sc.x + sc.w - off > 0;
+    if (errOn(sc, t) && t <= sc.errEnd) errState = true;
+    if (errOn(sc, t) && t <= sc.errEnd) anyErr = true;
+    if (!visible && !sc._hidden){ [...sc.dets, ...(sc.pd ? [sc.pd] : [])].forEach(d => d.el.style.opacity = 0); sc._hidden = true; }
+    if (!visible) return;
+    sc._hidden = false;
+    $('#camTrack').children[i].classList.toggle('bad', live && errOn(sc, t));
+    sc.dets.forEach(d => drawDet(d, live ? t : -1, tick));
+    if (sc.pd) drawDet(sc.pd, live ? t : -1, tick);
   });
+  // 오류를 잡은 환자를 보는 동안은 다른 알약 박스를 흰색으로 낮춰 오류 봉지만 눈에 띄게
+  track.classList.toggle('err', live && errState);
   const dot = $('#camDot'), ds = anyErr ? 'assets/cam_dot_err.svg' : 'assets/cam_dot.svg';
   if (dot && !dot.src.endsWith(ds)) dot.src = ds;
+}
+
+// 분석 결과용 약포지 사진: 촬영 때 쓴 사진에서 환자 약포지 부분(오류 환자는 오류 봉지 중심)을 잘라 디텍션 박스와 함께 보여 줌
+function pouchView(i){
+  const sc = SCENES[i], [cx, cy, cw, ch] = sc.crop, pc = (v, o, w) => `${(v - o) / w * 100}%`;
+  const box = (d, tag, inner='') => `<${tag}${d.bad ? ' class="bad"' : ''} style="left:${d.x/sc.w*100}%;top:${d.y/sc.h*100}%;width:${d.w/sc.w*100}%;height:${d.h/sc.h*100}%">${inner}</${tag}>`;
+  return `<div class="pview ${sc.pd ? 'err' : ''}" role="img" aria-label="환자 ${i+1} 약봉지 사진${sc.pd ? ', 오류 봉지 표시' : ''}"><div class="pv" style="left:${pc(0,cx,cw)};top:${pc(0,cy,ch)};width:${sc.w/cw*100}%;height:${sc.h/ch*100}%"><img src="${sc.img}" alt="">${sc.dets.map(d => box(d,'b')).join('')}${sc.pd ? box(sc.pd,'u','<i>!</i>') : ''}</div></div>`;
 }
 
 /* ---------- 실시간 환자 카드 ---------- */
@@ -1156,6 +1216,7 @@ function finishShoot(){
   // 분석 화면(로딩)은 없앰: 촬영 중에 이미 실시간으로 검수했으므로 바로 분석 결과로 간다
   const n = new Date();
   const r = makeRecord(`new${Date.now()}`, new Date(TODAY), n.getHours(), n.getMinutes(), 'err');
+  r.cam = true;   // 방금 촬영한 기록: 결과 화면에서 환자별 실제 약포지 사진과 디텍션을 보여 줌
   r.s = n.getSeconds();
   DB[key(TODAY)].unshift(r); lastNewId = r.id;
   histDate = new Date(TODAY);
@@ -1252,7 +1313,7 @@ function renderDetail(){
     $('#dBagTitle').textContent = '환자별 검사 결과';
     $('#dBagCount').textContent = pts.length;
     $('#dBags').innerHTML = pts.map(({g,i,st}) =>
-      `<div class="patient ${st} ${st!=='ok'?'open':''}"><button class="phead tap" data-patient><img class="pava" src="${PATIENT_IMG[i % PATIENT_IMG.length]}" alt=""><span class="ptxt"><span class="pname">환자 ${i+1} (${PATIENT_NAMES[i % PATIENT_NAMES.length]})</span><span class="psub">${st==='fail' ? r.failReason : patternText(r.patterns[i % r.patterns.length])}</span></span>${badge(st)}<img class="chev" src="assets/chevron_right.svg" alt=""></button><div class="pbody"><div>${st==='fail' && !hasPhoto(r) ? NO_PHOTO : `<img class="pouch" src="${sampleImg((idHash(r.id) + i) % 5 + 1)}" alt="환자 ${i+1} 약봉지 이미지">`}${st==='fail' ? '' : sortBad(g).filter(n => bad.has(n) || r.failBags.includes(n)).map(n => bagHTML(n, g.indexOf(n)+1, true)).join('')}</div></div></div>`
+      `<div class="patient ${st} ${st!=='ok'?'open':''}"><button class="phead tap" data-patient><img class="pava" src="${PATIENT_IMG[i % PATIENT_IMG.length]}" alt=""><span class="ptxt"><span class="pname">환자 ${i+1} (${PATIENT_NAMES[i % PATIENT_NAMES.length]})</span><span class="psub">${st==='fail' ? r.failReason : patternText(r.patterns[i % r.patterns.length])}</span></span>${badge(st)}<img class="chev" src="assets/chevron_right.svg" alt=""></button><div class="pbody"><div>${st==='fail' && !hasPhoto(r) ? NO_PHOTO : (r.cam && SCENES[i] ? pouchView(i) : `<img class="pouch" src="${sampleImg((idHash(r.id) + i) % 5 + 1)}" alt="환자 ${i+1} 약봉지 이미지">`)}${st==='fail' ? '' : sortBad(g).filter(n => bad.has(n) || r.failBags.includes(n)).map(n => bagHTML(n, g.indexOf(n)+1, true)).join('')}</div></div></div>`
     ).join('');
   } else {
     // 오류·실패 봉지만 하나씩 나열한다. 모두 정상이면 정상 한 줄로 묶어 보여 준다
