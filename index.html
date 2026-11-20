@@ -1059,7 +1059,7 @@ const SCENES = [
     boxes:[[469,230,44,23],[250,187,28,46],[264,228,28,25],[287,245,39,29],[311,188,24,26],[278,197,39,51],[92,224,28,21],[85,234,54,37],[130,248,47,26],[137,219,45,29],[149,197,28,29],[431,167,40,50],[440,217,23,24],[428,239,45,28],[487,203,29,28],[588,223,29,42],[609,218,39,27],[617,174,39,27]],
     extra:[[627,481,23,20],[667,426,24,20],[747,438,25,28],[746,481,24,23],[760,486,37,39],[790,508,41,18],[770,522,51,23],[912,488,30,38],[949,476,43,35],[969,503,26,23],[914,523,52,22],[967,525,28,27]], crop:[60,270,560,420] },
 ];
-const RECOG_V = 14, CAM_V = 90;   // 인식 중일 때와 검사 중일 때 카메라가 왼쪽으로 흐르는 속도(px/초)
+const CAM_V = 90;   // 검사 중 카메라가 왼쪽으로 흐르는 속도(px/초). 모든 환자가 같은 속도
 const BLINK = 0.35;                // 다음 환자 사진으로 바뀔 때 화면이 한 번 깜빡이는 시간(초)
 // 같은 값에서는 늘 같은 결과가 나오는 난수 (되감아도 같은 모습)
 const rnd = n => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
@@ -1076,10 +1076,10 @@ const rnd = n => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x 
                ...(sc.errPills || []).map(b => ({ x:b[0], y:b[1], w:b[2], h:b[3], bad:true }))].map((d, j) => ({...d, id:i*100+j}));
     if (sc.pouch) sc.pd = { x:sc.pouch[0]-L, y:sc.pouch[1]-T, w:sc.pouch[2], h:sc.pouch[3], id:i*100+99 };
     const travel = W - 640;
-    if (i === 0){   // 첫 환자: 인식 중에는 천천히, 인식이 끝나면 검사 속도로
+    if (i === 0){   // 첫 환자: 「약봉지 인식 중」 동안은 멈춰 있다가, 인식이 끝나면 다른 환자와 같은 속도로 흐름
       sc.from = 0; sc.start = RECOG_END;
-      sc.offAt = t => t < RECOG_END ? RECOG_V * t : Math.min(travel, RECOG_V * RECOG_END + CAM_V * (t - RECOG_END));
-      sc.timeAt = x => x <= RECOG_V * RECOG_END ? x / RECOG_V : RECOG_END + (x - RECOG_V * RECOG_END) / CAM_V;
+      sc.offAt = t => Math.min(travel, CAM_V * Math.max(0, t - RECOG_END));
+      sc.timeAt = x => RECOG_END + x / CAM_V;
       t0 = sc.timeAt(travel);
     } else {
       sc.from = sc.start = t0;
