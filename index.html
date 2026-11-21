@@ -777,6 +777,8 @@ const patternText = p => MEALS[p.length] ? p.map((n, k) => `${MEALS[p.length][k]
 // 촬영 장면 약포지 사진(strip_p1~p4)에서 봉지마다 직접 센 알약 수 [아침, 점심, 저녁]
 // 박은정 점심은 처방 기준 3알 (사진의 오류 봉지는 1알 누락)
 const CAM_PATTERNS = [[5,1,5],[4,2,5],[5,3,4],[5,5,5]];
+// 촬영 기록의 봉지 번호는 환자 약포지 띠(6칸)에서 몇 번째 칸인지로 적는다. 박은정은 띠의 4~6번째 칸을 검사하므로 오류 봉지가 5번 (피그마 165:3228)
+const CAM_BAG_OFFSET = [0,0,3,0];
 function seeded(n){ let s = n; return () => (s = (s*9301+49297)%233280)/233280; }
 function makeRecord(id, date, h, m, status){
   const r = { id, date, h, m, status, total: BAG_COUNT, anomalies: [], failBags: [] };
@@ -1193,7 +1195,7 @@ function liveState(t){
   const gs = patientGroups(BAG_COUNT);
   return SCENES.map((sc, i) => {
     const g = gs[i];
-    const errs = errOn(sc, t) ? ANOMALIES.filter(a => g.includes(a.bag)).map(a => ({...a, local: g.indexOf(a.bag)+1})) : [];
+    const errs = errOn(sc, t) ? ANOMALIES.filter(a => g.includes(a.bag)).map(a => ({...a, local: g.indexOf(a.bag)+1+CAM_BAG_OFFSET[i]})) : [];
     return {i, g, errs, started: t >= sc.start, now: t >= sc.start && t < sceneEnd(i)};
   }).filter(p => p.started);
 }
@@ -1299,7 +1301,7 @@ function patientGroups(total){
 function bagName(n){
   if (!dByPatient) return `${n}번 봉지`;
   const gs = patientGroups(dRec.total), i = gs.findIndex(g=>g.includes(n));
-  return `환자 ${i+1} · ${gs[i].indexOf(n)+1}번 봉지`;
+  return `환자 ${i+1} · ${gs[i].indexOf(n)+1+(dRec.cam ? CAM_BAG_OFFSET[i] : 0)}번 봉지`;
 }
 function openDetail(id, {fromResult=false}={}){
   dRec = findRecord(id); if (!dRec) return; dByPatient = fromResult;
@@ -1363,7 +1365,7 @@ function renderDetail(){
     $('#dBagTitle').textContent = '환자별 검사 결과';
     $('#dBagCount').textContent = pts.length;
     $('#dBags').innerHTML = pts.map(({g,i,st}) =>
-      `<div class="patient ${st} ${st!=='ok'?'open':''}"><button class="phead tap" data-patient><img class="pava" src="${PATIENT_IMG[i % PATIENT_IMG.length]}" alt=""><span class="ptxt"><span class="pname">환자 ${i+1} (${PATIENT_NAMES[i % PATIENT_NAMES.length]})</span><span class="psub">${st==='fail' ? r.failReason : patternText(r.patterns[i % r.patterns.length])}</span></span>${badge(st)}<img class="chev" src="assets/chevron_right.svg" alt=""></button><div class="pbody"><div>${st==='fail' && !hasPhoto(r) ? NO_PHOTO : (r.cam && SCENES[i] ? pouchView(i) : `<img class="pouch" src="${sampleImg((idHash(r.id) + i) % 5 + 1)}" alt="환자 ${i+1} 약봉지 이미지">`)}${st==='fail' ? '' : sortBad(g).filter(n => bad.has(n) || r.failBags.includes(n)).map(n => bagHTML(n, g.indexOf(n)+1, true)).join('')}</div></div></div>`
+      `<div class="patient ${st} ${st!=='ok'?'open':''}"><button class="phead tap" data-patient><img class="pava" src="${PATIENT_IMG[i % PATIENT_IMG.length]}" alt=""><span class="ptxt"><span class="pname">환자 ${i+1} (${PATIENT_NAMES[i % PATIENT_NAMES.length]})</span><span class="psub">${st==='fail' ? r.failReason : patternText(r.patterns[i % r.patterns.length])}</span></span>${badge(st)}<img class="chev" src="assets/chevron_right.svg" alt=""></button><div class="pbody"><div>${st==='fail' && !hasPhoto(r) ? NO_PHOTO : (r.cam && SCENES[i] ? pouchView(i) : `<img class="pouch" src="${sampleImg((idHash(r.id) + i) % 5 + 1)}" alt="환자 ${i+1} 약봉지 이미지">`)}${st==='fail' ? '' : sortBad(g).filter(n => bad.has(n) || r.failBags.includes(n)).map(n => bagHTML(n, g.indexOf(n)+1+(r.cam ? CAM_BAG_OFFSET[i] : 0), true)).join('')}</div></div></div>`
     ).join('');
   } else {
     // 오류·실패 봉지만 하나씩 나열한다. 모두 정상이면 정상 한 줄로 묶어 보여 준다
