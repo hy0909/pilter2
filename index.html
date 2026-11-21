@@ -276,6 +276,22 @@ button{font:inherit;border:0;background:none;cursor:pointer;color:inherit}
 /* 지나간 환자 카드는 80% 크기로 줄여 지금 검사 중인 카드가 먼저 보이게 함 */
 .pcard:not(.now){zoom:.8}
 .pcard .visit{position:absolute;left:4px;top:-15px;padding:2px 6px;border-radius:999px;background:#fff;color:var(--g900);font:500 11px/14px Pretendard;letter-spacing:.342px;white-space:nowrap}
+.pcard .pn,.pcard .no{display:none}
+.pcard .sub{display:contents}
+/* 봉지 번호 버전 (피그마 165:3228): 이름 + 「환자N」 아래에 상태 뱃지와 오류 봉지 번호. 가이드는 화면 양끝까지 */
+.device.bagno #camera .cambottom{height:72px;padding:4px 16px;align-items:flex-end}
+.device.bagno .pcard{flex:none;height:64px;flex-direction:column;align-items:flex-start;gap:2px;padding:6px 12px 8px;zoom:1}
+.device.bagno .pcard .nm{flex:none;align-items:baseline}
+.device.bagno .pcard .nm .n{display:none}
+.device.bagno .pcard .pn{display:inline;font:500 13px/18px Pretendard;letter-spacing:.252px;color:rgba(242,246,250,.75)}
+.device.bagno .pcard .sub{display:flex;align-items:center;gap:4px;height:20px}
+.device.bagno .pcard .no{display:inline;font:500 13px/18px Pretendard;letter-spacing:.252px;color:rgba(242,246,250,.75)}
+.device.bagno .pcard .no:empty{display:none}
+.device.bagno .pcard.now,.device.bagno .pcard.now.err{padding-right:12px}
+.device.bagno .pcard.now:not(.err) .sb{width:auto;height:18px;padding:0}
+.device.bagno .pcard .visit{left:9px;top:-11px}
+.device.bagno .camguide{left:0;right:0;top:57px;bottom:53px}
+.device.bagno .camguide i{width:16px;height:16px}
 /* 오류 환자 전체 보기: 촬영은 멈추지 않고 화면 오른쪽에 겹쳐 띄움 */
 .ppanel{position:absolute;z-index:8;right:16px;top:64px;bottom:64px;width:288px;background:#faf9f6;border-radius:12px;color:var(--g900);display:none;flex-direction:column;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.35)}
 .ppanel.on{display:flex;animation:pin .2s ease}
@@ -713,6 +729,8 @@ button{font:inherit;border:0;background:none;cursor:pointer;color:inherit}
   <div class="dwsel"><button data-dw="360" class="on">최소 360</button><button data-dw="412">최대 412</button></div>
   <b>가이드 영역</b>
   <div class="dwsel"><button data-guide="on" class="on">있음</button><button data-guide="off">없음</button></div>
+  <b>검사 카드</b>
+  <div class="dwsel"><button data-card="base" class="on">기본</button><button data-card="bagno">봉지 번호</button></div>
   <b>화면 바로가기</b>
   <button data-jump="splash">스플래시</button>
   <button data-jump="onboarding">온보딩</button>
@@ -753,7 +771,12 @@ const PATTERNS = [[2,2,1],[1,1],[1,2,1],[1],[2,1]];
 const NO_PHOTO = `<div class="nophoto"><svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 9c-1.626 0-3 1.374-3 3s1.374 3 3 3 3-1.374 3-3-1.374-3-3-3z"/><path d="M20 5h-2.586l-2.707-2.707A.996.996 0 0 0 14 2h-4a.996.996 0 0 0-.707.293L6.586 5H4c-1.103 0-2 .897-2 2v11c0 1.103.897 2 2 2h16c1.103 0 2-.897 2-2V7c0-1.103-.897-2-2-2zm-8 12c-2.71 0-5-2.29-5-5s2.29-5 5-5 5 2.29 5 5-2.29 5-5 5z"/></svg><span>사진이 없습니다</span></div>`;
 // 서버 오류·녹화 파일 없음이면 잘라 낸 약봉지 사진이 없다
 const hasPhoto = r => !(r.status === 'fail' && r.failReason !== '패턴 미감지');
-const patternText = p => `하루 ${p.length}회 · ${p.map(n => n + '알').join(' · ')}`;
+// 복약 패턴 표기: 하루 3회는 아침·점심·저녁, 2회는 아침·저녁으로 몇 알인지 적는다
+const MEALS = {3:['아침','점심','저녁'], 2:['아침','저녁']};
+const patternText = p => MEALS[p.length] ? p.map((n, k) => `${MEALS[p.length][k]} ${n}알`).join(' · ') : `하루 ${p.length}회 · ${p.map(n => n + '알').join(' · ')}`;
+// 촬영 장면 약포지 사진(strip_p1~p4)에서 봉지마다 직접 센 알약 수 [아침, 점심, 저녁]
+// 박은정 점심은 처방 기준 3알 (사진의 오류 봉지는 1알 누락)
+const CAM_PATTERNS = [[5,1,5],[4,2,5],[5,3,4],[5,5,5]];
 function seeded(n){ let s = n; return () => (s = (s*9301+49297)%233280)/233280; }
 function makeRecord(id, date, h, m, status){
   const r = { id, date, h, m, status, total: BAG_COUNT, anomalies: [], failBags: [] };
@@ -1190,7 +1213,7 @@ function renderStrip(force){
       c = document.createElement('div');
       c.dataset.i = p.i;
       const v = PATIENT_VISITS[p.i] || 1;
-      c.innerHTML = `<span class="nm"><span class="n">${p.i+1}</span><span class="p">${PATIENT_NAMES[p.i]}</span></span><span class="sb"></span>${v >= 2 ? `<span class="visit">${v}회 방문</span>` : ''}`;
+      c.innerHTML = `<span class="nm"><span class="n">${p.i+1}</span><span class="p">${PATIENT_NAMES[p.i]}</span><span class="pn">환자${p.i+1}</span></span><span class="sub"><span class="sb"></span><span class="no"></span></span>${v >= 2 ? `<span class="visit">${v}회 방문</span>` : ''}`;
       c.onclick = () => { if (c.classList.contains('err')) openPanel(p.i); };
       c.className = 'pcard enter';
       c.addEventListener('animationend', () => c.classList.remove('enter'), {once:true});
@@ -1203,6 +1226,8 @@ function renderStrip(force){
     c.classList.toggle('ok', st === 'ok'); c.classList.toggle('err', st === 'err'); c.classList.toggle('now', p.now);
     // 검사 중인 환자는 돌아가는 로딩 표시, 오류가 나오면 그 자리에서 바로 「오류」
     c.querySelector('.sb').innerHTML = st === 'err' ? '오류' : p.now ? '<img src="assets/loading_gray.svg" alt="검사 중">' : '정상';
+    // 봉지 번호 버전에서만 보이는 오류 봉지 번호 (환자마다 1번부터 셈)
+    c.querySelector('.no').textContent = st === 'err' ? p.errs.map(e => e.local).join('·') + '번' : '';
     if (st === 'err'){ c.setAttribute('role','button'); c.tabIndex = 0; c.setAttribute('aria-label', `${p.i+1}번 환자 오류 전체 보기`); }
   });
   if ($('#ppanel').classList.contains('on')) openPanel(+$('#ppanel').dataset.p, true);
@@ -1241,6 +1266,7 @@ function finishShoot(){
   const n = new Date();
   const r = makeRecord(`new${Date.now()}`, new Date(TODAY), n.getHours(), n.getMinutes(), 'err');
   r.cam = true;   // 방금 촬영한 기록: 결과 화면에서 환자별 실제 약포지 사진과 디텍션을 보여 줌
+  r.patterns = CAM_PATTERNS;   // 사진 속 실제 알약 수
   r.s = n.getSeconds();
   DB[key(TODAY)].unshift(r); lastNewId = r.id;
   histDate = new Date(TODAY);
@@ -1436,6 +1462,11 @@ document.querySelectorAll('[data-dw]').forEach(b => b.onclick = () => {
 document.querySelectorAll('[data-guide]').forEach(b => b.onclick = () => {
   device.classList.toggle('noguide', b.dataset.guide === 'off');
   document.querySelectorAll('[data-guide]').forEach(x => x.classList.toggle('on', x === b));
+});
+// 촬영 화면 카드: 기본 / 봉지 번호 버전(피그마 165:3228) 비교
+document.querySelectorAll('[data-card]').forEach(b => b.onclick = () => {
+  device.classList.toggle('bagno', b.dataset.card === 'bagno');
+  document.querySelectorAll('[data-card]').forEach(x => x.classList.toggle('on', x === b));
 });
 show('splash', {push:false});
 </script>
