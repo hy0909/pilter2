@@ -472,6 +472,8 @@ button{font:inherit;border:0;background:none;cursor:pointer;color:inherit}
 .jump button{text-align:left;padding:5px 6px;border-radius:6px}
 .jump button:hover{background:var(--g100)}
 .jump .dwsel{display:flex;gap:4px;margin-bottom:8px}
+.jump.appver .cardopt{display:none}
+.device.appver #camStrip{display:none}   /* 앱 버전: 지금 출시된 앱처럼 환자 카드 없이 촬영 화면만 */
 .jump hr{border:0;border-top:1px solid var(--g200);margin:2px 0 8px}
 .jump .sub{font:500 11px/14px Pretendard;font-style:normal;color:var(--g500);padding:0 6px 4px}
 .jump .dwsel button{flex:1;text-align:center;border:1px solid var(--g200);white-space:nowrap}
@@ -731,10 +733,12 @@ button{font:inherit;border:0;background:none;cursor:pointer;color:inherit}
   <div class="dwsel"><button data-dw="360" class="on">최소 360</button><button data-dw="412">최대 412</button></div>
   <hr>
   <b>검사(카메라)</b>
+  <i class="sub">화면 버전</i>
+  <div class="dwsel"><button data-ver="app">앱 버전</button><button data-ver="ux" class="on">UXUI 개선</button></div>
+  <i class="sub cardopt">검사 카드(환자명)</i>
+  <div class="dwsel cardopt"><button data-card="base" class="on">기본</button><button data-card="bagno">약봉지 번호</button></div>
   <i class="sub">가이드 영역</i>
   <div class="dwsel"><button data-guide="on" class="on">있음</button><button data-guide="off">없음</button></div>
-  <i class="sub">검사 카드(환자명)</i>
-  <div class="dwsel"><button data-card="base" class="on">기본</button><button data-card="bagno">약봉지 번호</button></div>
   <hr>
   <b>화면 바로가기</b>
   <button data-jump="splash">스플래시</button>
@@ -1489,10 +1493,24 @@ document.querySelectorAll('[data-guide]').forEach(b => b.onclick = () => {
   document.querySelectorAll('[data-guide]').forEach(x => x.classList.toggle('on', x === b));
 });
 // 촬영 화면 카드: 기본 / 봉지 번호 버전(피그마 165:3228) 비교
+let cardMode = 'base';
+const syncCamMode = () => {
+  const app = device.classList.contains('appver'), bagno = !app && cardMode === 'bagno';
+  device.classList.toggle('bagno', bagno);
+  applyCardMode(bagno);
+};
 document.querySelectorAll('[data-card]').forEach(b => b.onclick = () => {
-  device.classList.toggle('bagno', b.dataset.card === 'bagno');
-  applyCardMode(b.dataset.card === 'bagno');
+  cardMode = b.dataset.card;
   document.querySelectorAll('[data-card]').forEach(x => x.classList.toggle('on', x === b));
+  syncCamMode();
+});
+// 화면 버전: 앱 버전(환자 카드 없음) / UXUI 개선(검사 카드 있음). 앱 버전에서는 검사 카드 선택을 숨김
+document.querySelectorAll('[data-ver]').forEach(b => b.onclick = () => {
+  const app = b.dataset.ver === 'app';
+  device.classList.toggle('appver', app);
+  document.querySelector('.jump').classList.toggle('appver', app);
+  document.querySelectorAll('[data-ver]').forEach(x => x.classList.toggle('on', x === b));
+  syncCamMode();
 });
 show('splash', {push:false});
 </script>
