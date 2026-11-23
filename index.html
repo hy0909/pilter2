@@ -472,6 +472,8 @@ button{font:inherit;border:0;background:none;cursor:pointer;color:inherit}
 .jump button{text-align:left;padding:5px 6px;border-radius:6px}
 .jump button:hover{background:var(--g100)}
 .jump .dwsel{display:flex;gap:4px;margin-bottom:8px}
+.jump hr{border:0;border-top:1px solid var(--g200);margin:2px 0 8px}
+.jump .sub{font:500 11px/14px Pretendard;font-style:normal;color:var(--g500);padding:0 6px 4px}
 .jump .dwsel button{flex:1;text-align:center;border:1px solid var(--g200);white-space:nowrap}
 .jump .dwsel button.on{background:var(--teal-10);border-color:var(--teal-60);color:var(--teal-80);font-weight:600}
 @media (max-width:900px){.jump{display:none}}
@@ -727,10 +729,13 @@ button{font:inherit;border:0;background:none;cursor:pointer;color:inherit}
 <nav class="jump">
   <b>화면 크기</b>
   <div class="dwsel"><button data-dw="360" class="on">최소 360</button><button data-dw="412">최대 412</button></div>
-  <b>가이드 영역</b>
+  <hr>
+  <b>검사(카메라)</b>
+  <i class="sub">가이드 영역</i>
   <div class="dwsel"><button data-guide="on" class="on">있음</button><button data-guide="off">없음</button></div>
-  <b>검사 카드(환자명)</b>
+  <i class="sub">검사 카드(환자명)</i>
   <div class="dwsel"><button data-card="base" class="on">기본</button><button data-card="bagno">약봉지 번호</button></div>
+  <hr>
   <b>화면 바로가기</b>
   <button data-jump="splash">스플래시</button>
   <button data-jump="onboarding">온보딩</button>
