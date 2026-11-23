@@ -289,9 +289,9 @@ button{font:inherit;border:0;background:none;cursor:pointer;color:inherit}
 .device.bagno .pcard .no:empty{display:none}
 .device.bagno .pcard.now,.device.bagno .pcard.now.err{padding-right:12px}
 .device.bagno .pcard.now:not(.err) .sb{width:auto;height:18px;padding:0}
-.device.bagno .pcard .visit{left:9px;top:-11px}
+.device.bagno .pcard .visit{left:7px;top:-14px}
 .device.bagno .camguide{left:0;right:0;top:57px;bottom:53px}
-.device.bagno .camguide i{width:16px;height:16px}
+.device.bagno .camguide i{width:16px;height:16px;border-color:var(--g100)}
 /* 오류 환자 전체 보기: 촬영은 멈추지 않고 화면 오른쪽에 겹쳐 띄움 */
 .ppanel{position:absolute;z-index:8;right:16px;top:64px;bottom:64px;width:288px;background:#faf9f6;border-radius:12px;color:var(--g900);display:none;flex-direction:column;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.35)}
 .ppanel.on{display:flex;animation:pin .2s ease}
@@ -1097,10 +1097,17 @@ const SCENES = [
 ];
 const CAM_V = 90;   // 검사 중 카메라가 왼쪽으로 흐르는 속도(px/초). 모든 환자가 같은 속도
 const BLINK = 0.35;                // 다음 환자 사진으로 바뀔 때 화면이 한 번 깜빡이는 시간(초)
+// 「약봉지 번호」 카드 버전(피그마 184:3342)의 오류 환자(박은정) 장면: 사진 12, 띠 4번째 칸(4번 봉지)에 알약 4알
+const SCENE_P3_BASE = SCENES[2];
+const SCENE_P3_BAGNO = { img:'assets/cam/strip_p3b.jpg', place:[-440,-225,1094,820], pouch:[124,57,164,235],
+  boxes:[[485,251,31,30],[513,249,60,28],[561,222,32,41],[572,262,18,9],[333,187,31,29],[331,174,19,18],[367,185,47,47],[360,214,34,39],[0,222,54,39],[0,250,37,31]],
+  badBoxes:[[141,143,12,21],[151,147,25,43],[178,149,44,26],[151,176,45,53]],
+  extra:[[82,451,61,34],[91,481,46,28],[135,465,31,28],[131,492,49,24],[78,490,14,20],[275,457,63,29],[274,480,47,28],[322,480,29,31],[266,487,14,21],[425,381,28,28],[419,404,13,21]],
+  crop:[436,250,420,315] };
 // 같은 값에서는 늘 같은 결과가 나오는 난수 (되감아도 같은 모습)
 const rnd = n => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
 // 환자 사진은 서로 붙이지 않고 한 장씩 따로 보여 준다. 사진 첫 봉지부터 비추다가 사진 오른쪽 끝이 화면 끝에 닿으면 다음 환자로 넘어감
-(function buildTrack(){
+function buildTrack(){
   let t0 = 0;
   SCENES.forEach((sc, i) => {
     const [L, T, W, H] = sc.place;
@@ -1109,7 +1116,8 @@ const rnd = n => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x 
     // 피그마 박스 + 피그마 화면 밖이라 비어 있던 알약에 더 그린 박스(extra, 사진 기준) + 오류 봉지 안 알약(errPills, 사진 기준)
     sc.dets = [...sc.boxes.map(b => ({ x:b[0]-L, y:b[1]-T, w:b[2], h:b[3] })),
                ...(sc.extra || []).map(b => ({ x:b[0], y:b[1], w:b[2], h:b[3] })),
-               ...(sc.errPills || []).map(b => ({ x:b[0], y:b[1], w:b[2], h:b[3], bad:true }))].map((d, j) => ({...d, id:i*100+j}));
+               ...(sc.errPills || []).map(b => ({ x:b[0], y:b[1], w:b[2], h:b[3], bad:true })),
+               ...(sc.badBoxes || []).map(b => ({ x:b[0]-L, y:b[1]-T, w:b[2], h:b[3], bad:true }))].map((d, j) => ({...d, id:i*100+j}));
     if (sc.pouch) sc.pd = { x:sc.pouch[0]-L, y:sc.pouch[1]-T, w:sc.pouch[2], h:sc.pouch[3], id:i*100+99 };
     const travel = W - 640;
     if (i === 0){   // 첫 환자: 「약봉지 인식 중」 동안은 멈춰 있다가, 인식이 끝나면 다른 환자와 같은 속도로 흐름
@@ -1137,7 +1145,17 @@ const rnd = n => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x 
   $('#camStage').innerHTML = `<div class="camtrack" id="camTrack">${SCENES.map((sc, i) =>
     `<div class="cstrip" style="left:0;top:${sc.top}px;width:${sc.w}px;height:${sc.h}px;visibility:hidden"><img src="${sc.img}" alt="">${sc.dets.map(d => `<div class="db${d.bad ? ' inerr' : ''}" data-d="${d.id}"></div>`).join('')}${sc.pd ? `<div class="dp" data-d="${sc.pd.id}"><i>!</i></div>` : ''}</div>`).join('')}</div><div class="camblink" id="camBlink"></div><div class="camguide" aria-hidden="true"><i class="tl"></i><i class="tr"></i><i class="bl"></i><i class="br"></i></div>`;
   SCENES.forEach(sc => [...sc.dets, ...(sc.pd ? [sc.pd] : [])].forEach(d => d.el = $('#camStage').querySelector(`[data-d="${d.id}"]`)));
-})();
+}
+buildTrack();
+// 카드 버전에 따라 오류 환자 사진·오류 봉지·사진 속 알약 수를 바꿈 (기본: 2번째 봉지 2알, 약봉지 번호: 4번 봉지 4알)
+function applyCardMode(bagno){
+  SCENES[2] = bagno ? SCENE_P3_BAGNO : SCENE_P3_BASE;
+  Object.assign(ANOMALIES[0], bagno ? { bag: 7, why: '실제 4알 · 기대 5알' } : { bag: 8, why: '실제 2알 · 기대 3알' });
+  CAM_PATTERNS[2] = bagno ? [5,4,4] : [5,3,4];
+  SCENES.forEach(sc => { sc._hidden = false; });
+  buildTrack();
+  if (current === 'camera'){ renderStrip(true); renderScenes(); }
+}
 const sceneEnd = i => SCENES[i+1] ? SCENES[i+1].start : CAM_LEN;
 const errOn = (sc, t) => sc.errAt != null && t >= sc.errAt;
 const INFER_HZ = 12;   // 모델 추론 주기: 박스 위치는 이 간격으로만 바뀌어 실제 검출 결과처럼 살짝 끊겨 보임
@@ -1468,6 +1486,7 @@ document.querySelectorAll('[data-guide]').forEach(b => b.onclick = () => {
 // 촬영 화면 카드: 기본 / 봉지 번호 버전(피그마 165:3228) 비교
 document.querySelectorAll('[data-card]').forEach(b => b.onclick = () => {
   device.classList.toggle('bagno', b.dataset.card === 'bagno');
+  applyCardMode(b.dataset.card === 'bagno');
   document.querySelectorAll('[data-card]').forEach(x => x.classList.toggle('on', x === b));
 });
 show('splash', {push:false});
