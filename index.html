@@ -473,7 +473,7 @@ button{font:inherit;border:0;background:none;cursor:pointer;color:inherit}
 .jump button:hover{background:var(--g100)}
 .jump .dwsel{display:flex;gap:4px;margin-bottom:8px}
 .jump.appver .cardopt{display:none}
-.device.appver #camStrip{display:none}   /* 앱 버전: 지금 출시된 앱처럼 환자 카드 없이 촬영 화면만 */
+.device.appver #camStrip,.device.appver .camguide{display:none !important}   /* 앱 버전은 가이드 영역도 지원하지 않음 */   /* 앱 버전: 지금 출시된 앱처럼 환자 카드 없이 촬영 화면만 */
 .jump hr{border:0;border-top:1px solid var(--g200);margin:2px 0 8px}
 .jump .sub{font:500 11px/14px Pretendard;font-style:normal;color:var(--g500);padding:0 6px 4px}
 .jump .dwsel button{flex:1;text-align:center;border:1px solid var(--g200);white-space:nowrap}
@@ -737,8 +737,8 @@ button{font:inherit;border:0;background:none;cursor:pointer;color:inherit}
   <div class="dwsel"><button data-ver="app">앱 버전</button><button data-ver="ux" class="on">UXUI 개선</button></div>
   <i class="sub cardopt">검사 카드(환자명)</i>
   <div class="dwsel cardopt"><button data-card="base" class="on">기본</button><button data-card="bagno">약봉지 번호</button></div>
-  <i class="sub">가이드 영역</i>
-  <div class="dwsel"><button data-guide="on" class="on">있음</button><button data-guide="off">없음</button></div>
+  <i class="sub cardopt">가이드 영역</i>
+  <div class="dwsel cardopt"><button data-guide="on" class="on">있음</button><button data-guide="off">없음</button></div>
   <hr>
   <b>화면 바로가기</b>
   <button data-jump="splash">스플래시</button>
@@ -1504,7 +1504,7 @@ document.querySelectorAll('[data-card]').forEach(b => b.onclick = () => {
   document.querySelectorAll('[data-card]').forEach(x => x.classList.toggle('on', x === b));
   syncCamMode();
 });
-// 화면 버전: 앱 버전(환자 카드 없음) / UXUI 개선(검사 카드 있음). 앱 버전에서는 검사 카드 선택을 숨김
+// 화면 버전: 앱 버전(환자 카드·가이드 영역 없음) / UXUI 개선. 앱 버전에서는 검사 카드·가이드 영역 선택을 숨김
 document.querySelectorAll('[data-ver]').forEach(b => b.onclick = () => {
   const app = b.dataset.ver === 'app';
   device.classList.toggle('appver', app);
